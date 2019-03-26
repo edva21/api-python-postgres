@@ -67,3 +67,36 @@ BEGIN
 END; $$
 
 LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION update_vendor(id integer,name VARCHAR)
+  RETURNS VOID AS
+$$
+UPDATE vendors SET vendor_name=name WHERE vendor_id = id;
+$$
+LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION create_vendor(name VARCHAR)
+  RETURNS VOID AS
+$$
+    INSERT INTO vendors(vendor_name) VALUES(name);
+$$
+LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION delete_vendor(id integer)
+  RETURNS VOID AS
+$$
+    DELETE FROM vendors WHERE vendors.vendor_id=id;
+$$
+LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION read_vendor()
+  RETURNS TABLE(vendor_id INTEGER, vendor_name VARCHAR) AS
+$$
+BEGIN
+ RETURN QUERY
+ SELECT vendors.vendor_id,vendors.vendor_name
+ FROM vendors;
+
+END; $$
+
+LANGUAGE plpgsql;
