@@ -47,48 +47,68 @@ class Vendor(Resource):
         # close the communication with the PostgreSQL database server
         cur.close()
         return results,200
-    def post(self, name):
+    def post(self, vendor_id):
+        # read database configuration
+        params = config()
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(**params)
+        # create a cursor object for execution
+        cur = conn.cursor()
+        # another way to call a stored procedure
+        # cur.execute("SELECT * FROM get_parts_by_vendor( %s); ",(vendor_id,))
         parser = reqparse.RequestParser()
-        parser.add_argument("age")
-        parser.add_argument("occupation")
+        parser.add_argument("vendor_name")
         args = parser.parse_args()
+        cur.callproc('update_vendor', (vendor_id,args["vendor_name"]))
 
-        for user in users:
-            if(name == user["name"]):
-                return "User with name {} already exists".format(name), 400
+        vendors=[]
 
-        user = {
-            "name": name,
-            "age": args["age"],
-            "occupation": args["occupation"]
+        vendor = {
+            "vendor_name": args["vendor_name"],
+            "vendor_id": vendor_id,
         }
-        users.append(user)
-        return user, 201
+        vendors.append(vendor)
+        return vendor, 202
 
-    def put(self, name):
+    def put(self):
+         # read database configuration
+        params = config()
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(**params)
+        # create a cursor object for execution
+        cur = conn.cursor()
+        # another way to call a stored procedure
+        # cur.execute("SELECT * FROM get_parts_by_vendor( %s); ",(vendor_id,))
         parser = reqparse.RequestParser()
-        parser.add_argument("age")
-        parser.add_argument("occupation")
+        parser.add_argument("vendor_name")
         args = parser.parse_args()
+        cur.callproc('create_vendor', (args["vendor_name"]))
 
-        for user in users:
-            if(name == user["name"]):
-                user["age"] = args["age"]
-                user["occupation"] = args["occupation"]
-                return user, 200
-        
-        user = {
-            "name": name,
-            "age": args["age"],
-            "occupation": args["occupation"]
+        vendors=[]
+
+        vendor = {
+            "vendor_name": args["vendor_name"],
         }
-        users.append(user)
-        return user, 201
+        vendors.append(vendor)
+        return vendor, 201
 
-    def delete(self, name):
-        global users
-        users = [user for user in users if user["name"] != name]
-        return "{} is deleted.".format(name), 200
+    def delete(self, vendor_id):
+        # read database configuration
+        params = config()
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(**params)
+        # create a cursor object for execution
+        cur = conn.cursor()
+        # another way to call a stored procedure
+        # cur.execute("SELECT * FROM get_parts_by_vendor( %s); ",(vendor_id,))
+        cur.callproc('delete_vendor', vendor_id)
+        # process the result set
+        vendor = {
+            "vendor_id": vendor_id,
+        }
+        # close the communication with the PostgreSQL database server
+        cur.close()
+        return vendor,202
       
 api.add_resource(Vendor, "/vendor/<string:vendor_id>")
 
